@@ -12,4 +12,8 @@ data/processed/
 *.tmp
 *.bak
 *.swp
-.DS_Store.vscode/
+.DS_Store
+
+# IBM AML dataset - downloaded locally, never commit
+data/raw/ibm_aml/
+.vscode/
