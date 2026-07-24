@@ -30,4 +30,5 @@ def test_default_registry_contains_expected_placeholder_tools() -> None:
 
     assert registry.exists("transaction_filter")
     assert registry.exists("risk_scoring")
+    assert registry.get("feature_engineering").metadata.availability.value == "implemented"
     assert registry.get("risk_scoring").metadata.availability.value == "placeholder"

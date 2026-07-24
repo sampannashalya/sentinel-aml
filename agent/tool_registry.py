@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from pydantic import BaseModel, ConfigDict, Field
 
 from agent.tool_contracts import PlaceholderTool, ToolContract, ToolMetadata
+from tools.feature_engineering import FeatureEngineeringTool
 
 
 class ToolRegistry:
@@ -40,7 +41,7 @@ def build_default_tool_registry() -> ToolRegistry:
         PlaceholderTool("aggregation", "Aggregate transactions into query-specific summaries."),
         PlaceholderTool("threshold_rule", "Evaluate threshold-based suspicious activity rules."),
         PlaceholderTool("customer_lookup", "Retrieve customer-scoped records and profile information."),
-        PlaceholderTool("feature_engineering", "Create AML-oriented transactional features."),
+        FeatureEngineeringTool(),
         PlaceholderTool("structuring_detector", "Detect structuring-oriented suspicious patterns."),
         PlaceholderTool("smurfing_detector", "Detect smurfing-oriented suspicious patterns."),
         PlaceholderTool("velocity_detector", "Detect sudden transaction velocity changes."),
