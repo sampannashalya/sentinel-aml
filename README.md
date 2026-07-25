@@ -65,6 +65,22 @@ Phase 7 adds deterministic report generation on top of risk assessment:
 - report IDs and substantive content are deterministic; no LLM, API, or dashboard is required
 - reports describe suspicious patterns for review and do not establish guilt or criminal conduct
 
+## Phase 8 Streamlit Demo
+
+Phase 8 adds a lightweight Streamlit demo application that reuses the existing backend:
+- `app.py` presents demo and account investigation modes
+- demo mode uses deterministic synthetic evidence and the real aggregator, scorer, and report builder
+- account mode uses existing targeted detector paths when local IBM data and cached features are available
+- the UI includes a natural-language query preview, investigation results, evidence summaries, risk breakdowns, and investigation report output
+
+Run the app with:
+
+```bash
+streamlit run app.py
+```
+
+The demo identifies suspicious behavioral patterns for analyst review. It does not establish money laundering, fraud, criminal conduct, or legal liability.
+
 ## Phase 3 Architecture
 
 ```mermaid
