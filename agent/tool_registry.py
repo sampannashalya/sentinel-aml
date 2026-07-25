@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from agent.tool_contracts import PlaceholderTool, ToolContract, ToolMetadata
 from detection import CycleDetector, FanInDetector, FanOutDetector, GatherScatterDetector, ScatterGatherDetector, VelocityDetector
+from investigation import InvestigationReportBuilderTool
 from risk import EvidenceAggregatorTool, RiskScorerTool
 from tools.feature_engineering import FeatureEngineeringTool
 
@@ -54,6 +55,7 @@ def build_default_tool_registry() -> ToolRegistry:
         VelocityDetector(),
         EvidenceAggregatorTool(),
         RiskScorerTool(),
+        InvestigationReportBuilderTool(),
         PlaceholderTool("behavior_deviation_detector", "Detect deviations from historical behavior."),
         PlaceholderTool("anomaly_detector", "Score transactions or customers using anomaly signals."),
         PlaceholderTool("risk_scoring", "Combine signals into an explainable risk score."),

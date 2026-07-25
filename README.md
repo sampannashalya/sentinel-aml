@@ -57,6 +57,14 @@ Phase 6 adds a deterministic evidence aggregation and risk-scoring layer:
 
 Risk scores represent suspicious-pattern evidence only. They are not proof of money laundering or criminal activity.
 
+## Phase 7 Investigation Reports
+
+Phase 7 adds deterministic report generation on top of risk assessment:
+- `InvestigationReportBuilder` converts a `RiskAssessment` into a structured analyst-facing report
+- reports include an executive summary, bounded evidence summaries, a chronological timeline, score explanation, recommended actions, and compliance disclaimer
+- report IDs and substantive content are deterministic; no LLM, API, or dashboard is required
+- reports describe suspicious patterns for review and do not establish guilt or criminal conduct
+
 ## Phase 3 Architecture
 
 ```mermaid
