@@ -51,6 +51,10 @@ class QueryParser:
             return QueryIntent.customer_investigation
         if "show high-risk customers" in lowered or "show high risk customers" in lowered:
             return QueryIntent.high_risk_search
+        if self._has_fan_out_terms(lowered):
+            return QueryIntent.fan_out_detection
+        if self._has_fan_in_terms(lowered):
+            return QueryIntent.fan_in_detection
         if "velocity" in lowered:
             return QueryIntent.velocity_analysis
         if "structuring" in lowered:
@@ -122,6 +126,10 @@ class QueryParser:
         return match.group(1) if match else None
 
     def _detect_pattern(self, lowered: str, intent: QueryIntent) -> AMLPattern | None:
+        if self._has_fan_out_terms(lowered) or intent == QueryIntent.fan_out_detection:
+            return AMLPattern.fan_out
+        if self._has_fan_in_terms(lowered) or intent == QueryIntent.fan_in_detection:
+            return AMLPattern.fan_in
         if "structuring" in lowered or intent == QueryIntent.structuring_detection:
             return AMLPattern.structuring
         if "smurfing" in lowered or intent == QueryIntent.smurfing_detection:
@@ -143,7 +151,13 @@ class QueryParser:
             return RequestedOutput.case_file
         if intent == QueryIntent.high_risk_search:
             return RequestedOutput.customer_list
-        if intent in {QueryIntent.structuring_detection, QueryIntent.smurfing_detection, QueryIntent.velocity_analysis}:
+        if intent in {
+            QueryIntent.structuring_detection,
+            QueryIntent.smurfing_detection,
+            QueryIntent.fan_out_detection,
+            QueryIntent.fan_in_detection,
+            QueryIntent.velocity_analysis,
+        }:
             return RequestedOutput.pattern_summary
         if self._has_threshold_terms(lowered):
             return RequestedOutput.customer_list
@@ -157,6 +171,20 @@ class QueryParser:
         return bool(
             re.search(r"\b\d+\s*(?:or more|\+|plus|at least)\s+transactions?\b", lowered)
             or re.search(r"\b(?:under|below|less than|over|above|more than)\s+\$?\d", lowered)
+        )
+
+    def _has_fan_out_terms(self, lowered: str) -> bool:
+        return bool(
+            re.search(r"\bfan[- ]?out\b", lowered)
+            or ("sending" in lowered and "many" in lowered and ("receiver" in lowered or "different accounts" in lowered))
+            or ("source account" in lowered and "many" in lowered and "receiver" in lowered)
+        )
+
+    def _has_fan_in_terms(self, lowered: str) -> bool:
+        return bool(
+            re.search(r"\bfan[- ]?in\b", lowered)
+            or ("receiving" in lowered and "many" in lowered and ("sender" in lowered or "different accounts" in lowered))
+            or ("received" in lowered and "many" in lowered and ("sender" in lowered or "different accounts" in lowered))
         )
 
     def _to_number(self, text: str) -> float:

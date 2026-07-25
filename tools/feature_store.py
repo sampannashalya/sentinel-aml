@@ -37,3 +37,6 @@ class FeatureStore:
         features = pd.read_parquet(self.features_path)
         labels = pd.read_parquet(self.labels_path)
         return features, labels, metadata
+
+    def load_features(self) -> pd.DataFrame:
+        return pd.read_parquet(self.features_path)

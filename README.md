@@ -34,6 +34,20 @@ Label-leakage policy:
 
 Phase 4 adds a dedicated IBM dataset adapter plus scalable account-level feature engineering on top of the canonical transaction schema.
 
+## Phase 5A Detection Evidence
+
+SentinelAML detector output represents suspicious-pattern evidence and is not proof of money laundering.
+
+Implemented Phase 5A detectors:
+- `fan_out_detector`: source accounts sending to many distinct receivers inside a configurable time window
+- `fan_in_detector`: destination accounts receiving from many distinct senders inside a configurable time window
+- `velocity_detector`: accounts exceeding configurable transaction-velocity thresholds using cached account features
+
+Evaluation-only labels and annotations:
+- IBM `Is Laundering` / `is_laundering` labels are excluded from detector decision inputs
+- `HI-Small_Patterns.txt` annotations are parsed only for post-detection evaluation
+- Labels and annotations are not used as engineered detector features, thresholds, planner inputs, or triggering evidence
+
 ## Phase 3 Architecture
 
 ```mermaid

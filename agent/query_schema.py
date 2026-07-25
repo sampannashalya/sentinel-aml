@@ -11,6 +11,8 @@ class QueryIntent(str, Enum):
     suspicious_activity_search = "suspicious_activity_search"
     structuring_detection = "structuring_detection"
     smurfing_detection = "smurfing_detection"
+    fan_out_detection = "fan_out_detection"
+    fan_in_detection = "fan_in_detection"
     velocity_analysis = "velocity_analysis"
     customer_investigation = "customer_investigation"
     threshold_analysis = "threshold_analysis"
@@ -23,6 +25,8 @@ class AMLPattern(str, Enum):
     suspicious_activity = "suspicious_activity"
     structuring = "structuring"
     smurfing = "smurfing"
+    fan_out = "fan_out"
+    fan_in = "fan_in"
     velocity = "velocity"
     behavior_deviation = "behavior_deviation"
 

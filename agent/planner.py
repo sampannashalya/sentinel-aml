@@ -22,6 +22,10 @@ class AgentPlanner:
             return self._plan_high_risk_search(query_request)
         if intent == QueryIntent.velocity_analysis:
             return self._plan_velocity(query_request)
+        if intent == QueryIntent.fan_out_detection:
+            return self._plan_fan_out(query_request)
+        if intent == QueryIntent.fan_in_detection:
+            return self._plan_fan_in(query_request)
         if intent == QueryIntent.smurfing_detection:
             return self._plan_smurfing(query_request)
         if intent == QueryIntent.suspicious_activity_search:
@@ -132,6 +136,26 @@ class AgentPlanner:
             steps=steps,
             skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "structuring_detector", "smurfing_detector", "behavior_deviation_detector", "anomaly_detector", "risk_lookup"],
             planning_summary="Velocity-focused query; use temporal features and the velocity detector only.",
+        )
+
+    def _plan_fan_out(self, query_request: QueryRequest) -> ExecutionPlan:
+        return ExecutionPlan(
+            query_intent=query_request.intent,
+            steps=[
+                self._step(1, "fan_out_detector", "The user requested fan-out behavior: one source sending to many distinct receivers.", parameters=self._scope_parameters(query_request)),
+            ],
+            skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_in_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
+            planning_summary="Fan-out query; run only the targeted fan-out detector.",
+        )
+
+    def _plan_fan_in(self, query_request: QueryRequest) -> ExecutionPlan:
+        return ExecutionPlan(
+            query_intent=query_request.intent,
+            steps=[
+                self._step(1, "fan_in_detector", "The user requested fan-in behavior: one destination receiving from many distinct senders.", parameters=self._scope_parameters(query_request)),
+            ],
+            skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_out_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
+            planning_summary="Fan-in query; run only the targeted fan-in detector.",
         )
 
     def _plan_smurfing(self, query_request: QueryRequest) -> ExecutionPlan:
