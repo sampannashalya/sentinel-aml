@@ -55,6 +55,12 @@ class QueryParser:
             return QueryIntent.fan_out_detection
         if self._has_fan_in_terms(lowered):
             return QueryIntent.fan_in_detection
+        if self._has_cycle_terms(lowered):
+            return QueryIntent.cycle_detection
+        if self._has_gather_scatter_terms(lowered):
+            return QueryIntent.gather_scatter_detection
+        if self._has_scatter_gather_terms(lowered):
+            return QueryIntent.scatter_gather_detection
         if "velocity" in lowered:
             return QueryIntent.velocity_analysis
         if "structuring" in lowered:
@@ -130,6 +136,12 @@ class QueryParser:
             return AMLPattern.fan_out
         if self._has_fan_in_terms(lowered) or intent == QueryIntent.fan_in_detection:
             return AMLPattern.fan_in
+        if self._has_cycle_terms(lowered) or intent == QueryIntent.cycle_detection:
+            return AMLPattern.cycle
+        if self._has_gather_scatter_terms(lowered) or intent == QueryIntent.gather_scatter_detection:
+            return AMLPattern.gather_scatter
+        if self._has_scatter_gather_terms(lowered) or intent == QueryIntent.scatter_gather_detection:
+            return AMLPattern.scatter_gather
         if "structuring" in lowered or intent == QueryIntent.structuring_detection:
             return AMLPattern.structuring
         if "smurfing" in lowered or intent == QueryIntent.smurfing_detection:
@@ -156,6 +168,9 @@ class QueryParser:
             QueryIntent.smurfing_detection,
             QueryIntent.fan_out_detection,
             QueryIntent.fan_in_detection,
+            QueryIntent.cycle_detection,
+            QueryIntent.gather_scatter_detection,
+            QueryIntent.scatter_gather_detection,
             QueryIntent.velocity_analysis,
         }:
             return RequestedOutput.pattern_summary
@@ -186,6 +201,15 @@ class QueryParser:
             or ("receiving" in lowered and "many" in lowered and ("sender" in lowered or "different accounts" in lowered))
             or ("received" in lowered and "many" in lowered and ("sender" in lowered or "different accounts" in lowered))
         )
+
+    def _has_cycle_terms(self, lowered: str) -> bool:
+        return bool(re.search(r"\b(cycle|circular)\b", lowered))
+
+    def _has_gather_scatter_terms(self, lowered: str) -> bool:
+        return bool(re.search(r"\bgather[- ]?scatter\b", lowered))
+
+    def _has_scatter_gather_terms(self, lowered: str) -> bool:
+        return bool(re.search(r"\bscatter[- ]?gather\b", lowered))
 
     def _to_number(self, text: str) -> float:
         return float(text.replace(",", ""))

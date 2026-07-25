@@ -14,6 +14,9 @@ class QueryIntent(str, Enum):
     fan_out_detection = "fan_out_detection"
     fan_in_detection = "fan_in_detection"
     velocity_analysis = "velocity_analysis"
+    cycle_detection = "cycle_detection"
+    gather_scatter_detection = "gather_scatter_detection"
+    scatter_gather_detection = "scatter_gather_detection"
     customer_investigation = "customer_investigation"
     threshold_analysis = "threshold_analysis"
     risk_explanation = "risk_explanation"
@@ -28,6 +31,9 @@ class AMLPattern(str, Enum):
     fan_out = "fan_out"
     fan_in = "fan_in"
     velocity = "velocity"
+    cycle = "cycle"
+    gather_scatter = "gather_scatter"
+    scatter_gather = "scatter_gather"
     behavior_deviation = "behavior_deviation"
 
 

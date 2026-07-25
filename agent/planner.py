@@ -26,6 +26,12 @@ class AgentPlanner:
             return self._plan_fan_out(query_request)
         if intent == QueryIntent.fan_in_detection:
             return self._plan_fan_in(query_request)
+        if intent == QueryIntent.cycle_detection:
+            return self._plan_cycle(query_request)
+        if intent == QueryIntent.gather_scatter_detection:
+            return self._plan_gather_scatter(query_request)
+        if intent == QueryIntent.scatter_gather_detection:
+            return self._plan_scatter_gather(query_request)
         if intent == QueryIntent.smurfing_detection:
             return self._plan_smurfing(query_request)
         if intent == QueryIntent.suspicious_activity_search:
@@ -156,6 +162,36 @@ class AgentPlanner:
             ],
             skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_out_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
             planning_summary="Fan-in query; run only the targeted fan-in detector.",
+        )
+
+    def _plan_cycle(self, query_request: QueryRequest) -> ExecutionPlan:
+        return ExecutionPlan(
+            query_intent=query_request.intent,
+            steps=[
+                self._step(1, "cycle_detector", "The user requested a circular transaction cycle.", parameters=self._scope_parameters(query_request)),
+            ],
+            skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_out_detector", "fan_in_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
+            planning_summary="Cycle query; run only the targeted cycle detector.",
+        )
+
+    def _plan_gather_scatter(self, query_request: QueryRequest) -> ExecutionPlan:
+        return ExecutionPlan(
+            query_intent=query_request.intent,
+            steps=[
+                self._step(1, "gather_scatter_detector", "The user requested gather-scatter behavior.", parameters=self._scope_parameters(query_request)),
+            ],
+            skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_out_detector", "fan_in_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
+            planning_summary="Gather-scatter query; run only the targeted gather-scatter detector.",
+        )
+
+    def _plan_scatter_gather(self, query_request: QueryRequest) -> ExecutionPlan:
+        return ExecutionPlan(
+            query_intent=query_request.intent,
+            steps=[
+                self._step(1, "scatter_gather_detector", "The user requested scatter-gather behavior.", parameters=self._scope_parameters(query_request)),
+            ],
+            skipped_tools=["dataset_profiler", "eda", "transaction_filter", "aggregation", "threshold_rule", "customer_lookup", "feature_engineering", "structuring_detector", "smurfing_detector", "fan_out_detector", "fan_in_detector", "velocity_detector", "behavior_deviation_detector", "anomaly_detector", "risk_scoring", "explanation", "risk_lookup"],
+            planning_summary="Scatter-gather query; run only the targeted scatter-gather detector.",
         )
 
     def _plan_smurfing(self, query_request: QueryRequest) -> ExecutionPlan:

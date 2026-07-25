@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from pydantic import BaseModel, ConfigDict, Field
 
 from agent.tool_contracts import PlaceholderTool, ToolContract, ToolMetadata
-from detection import FanInDetector, FanOutDetector, VelocityDetector
+from detection import CycleDetector, FanInDetector, FanOutDetector, GatherScatterDetector, ScatterGatherDetector, VelocityDetector
 from tools.feature_engineering import FeatureEngineeringTool
 
 
@@ -47,6 +47,9 @@ def build_default_tool_registry() -> ToolRegistry:
         PlaceholderTool("smurfing_detector", "Detect smurfing-oriented suspicious patterns."),
         FanOutDetector(),
         FanInDetector(),
+        CycleDetector(),
+        GatherScatterDetector(),
+        ScatterGatherDetector(),
         VelocityDetector(),
         PlaceholderTool("behavior_deviation_detector", "Detect deviations from historical behavior."),
         PlaceholderTool("anomaly_detector", "Score transactions or customers using anomaly signals."),
