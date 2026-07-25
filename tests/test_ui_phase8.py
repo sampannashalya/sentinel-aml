@@ -5,7 +5,17 @@ from datetime import datetime
 from detection import DetectionEvidence
 from investigation import InvestigationReportBuilder
 from risk import RiskAssessment, RiskLevel, RiskScoreBreakdown
-from ui.components import breakdown_rows, evidence_rows, format_amount, format_risk_score, parse_and_plan_query, timeline_rows
+from app import evidence_rows_from_assessment
+from ui.components import (
+    breakdown_rows,
+    evidence_rows,
+    format_amount,
+    format_amount_compact,
+    format_risk_score,
+    ibm_dataset_status_label,
+    parse_and_plan_query,
+    timeline_rows,
+)
 from ui.demo_data import INVESTIGATION_SOURCE_LABEL, build_demo_bundle, build_demo_evidence, summarize_query_plan
 
 
@@ -30,6 +40,7 @@ def test_demo_pipeline_uses_real_backend() -> None:
 def test_metric_formatting_helpers() -> None:
     assert format_amount(1234.5) == "$1,234.50"
     assert format_risk_score(70.048) == "70.0"
+    assert format_amount_compact(50800.0) == "$50.8K"
 
 
 def test_breakdown_conversion_is_stable() -> None:
@@ -118,6 +129,18 @@ def test_label_like_metadata_does_not_change_demo_report() -> None:
     assert "is_laundering" not in str(report_b.model_dump())
 
 
+def test_report_rendering_helper_uses_assessment_breakdown_not_report_breakdown() -> None:
+    bundle = build_demo_bundle(generated_at=datetime(2022, 9, 1, 12, 0))
+    assert bundle.assessment is not None
+    assert bundle.report is not None
+
+    rows = breakdown_rows(bundle.assessment.score_breakdown)
+
+    assert rows
+    assert not hasattr(bundle.report, "score_breakdown")
+    assert evidence_rows_from_assessment(bundle.assessment).shape[0] == bundle.assessment.evidence_count
+
+
 def test_all_typologies_are_representable_in_demo_mode() -> None:
     bundle = build_demo_bundle(["FAN-OUT", "FAN-IN", "VELOCITY", "CYCLE", "GATHER-SCATTER", "SCATTER-GATHER"], generated_at=datetime(2022, 9, 1, 12, 0))
 
@@ -138,3 +161,13 @@ def test_synthetic_evidence_is_marked_as_demo_only() -> None:
     assert bundle.is_synthetic is True
     assert bundle.source_label == "Demo / Synthetic Evidence"
     assert all(item.metadata.get("source") == "synthetic_demo" for item in bundle.evidence)
+
+
+def test_ibm_dataset_status_label_is_privacy_safe() -> None:
+    available = ibm_dataset_status_label(True)
+    missing = ibm_dataset_status_label(False)
+
+    assert available == "IBM AML dataset: Available"
+    assert missing == "IBM AML dataset: Not found"
+    assert "C:\\" not in available
+    assert "C:\\" not in missing

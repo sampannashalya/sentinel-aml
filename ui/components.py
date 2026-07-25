@@ -14,8 +14,22 @@ def format_amount(value: float) -> str:
     return f"${float(value):,.2f}"
 
 
+def format_amount_compact(value: float) -> str:
+    amount = float(value)
+    magnitude = abs(amount)
+    if magnitude >= 1_000_000:
+        return f"${amount / 1_000_000:.1f}M"
+    if magnitude >= 1_000:
+        return f"${amount / 1_000:.1f}K"
+    return f"${amount:.2f}"
+
+
 def format_risk_score(value: float) -> str:
     return f"{float(value):.1f}"
+
+
+def ibm_dataset_status_label(is_available: bool) -> str:
+    return "IBM AML dataset: Available" if is_available else "IBM AML dataset: Not found"
 
 
 def breakdown_rows(breakdown: RiskScoreBreakdown) -> list[dict[str, object]]:

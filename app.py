@@ -4,9 +4,19 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from config.settings import IBM_RAW_DIR
+from config.settings import IBM_TRANSACTION_PATH
 from investigation import InvestigationReport
-from ui.components import breakdown_rows, evidence_rows, format_amount, format_risk_score, parse_and_plan_query, timeline_rows
+from risk import RiskAssessment
+from ui.components import (
+    breakdown_rows,
+    evidence_rows,
+    format_amount,
+    format_amount_compact,
+    format_risk_score,
+    ibm_dataset_status_label,
+    parse_and_plan_query,
+    timeline_rows,
+)
 from ui.demo_data import ALL_TYPOLOGIES, INVESTIGATION_SOURCE_LABEL, build_account_investigation_bundle, build_demo_bundle
 
 
@@ -33,7 +43,7 @@ def main() -> None:
     run_investigation = st.sidebar.button("Run Investigation", type="primary")
 
     st.sidebar.divider()
-    st.sidebar.write(f"IBM raw data directory: `{IBM_RAW_DIR}`")
+    st.sidebar.write(ibm_dataset_status_label(IBM_TRANSACTION_PATH.exists()))
 
     query_preview = parse_and_plan_query(query_text)
     with st.sidebar.expander("Query parser / planner preview", expanded=False):
@@ -70,17 +80,17 @@ def main() -> None:
         st.warning("No investigation report could be produced for the selected inputs.")
         return
 
-    _render_report(bundle.report)
+    _render_report(bundle.assessment, bundle.report)
 
 
-def _render_report(report: InvestigationReport) -> None:
+def _render_report(assessment: RiskAssessment, report: InvestigationReport) -> None:
     metrics = st.columns(6)
-    metrics[0].metric("Risk Score", format_risk_score(report.risk_score))
-    metrics[1].metric("Risk Level", report.risk_level)
-    metrics[2].metric("Evidence Count", str(report.evidence_count))
-    metrics[3].metric("Typologies", str(len(report.typologies_detected)))
-    metrics[4].metric("Suspicious Tx", str(report.suspicious_transaction_count))
-    metrics[5].metric("Suspicious Amount", format_amount(report.suspicious_amount))
+    metrics[0].metric("Risk Score", format_risk_score(assessment.risk_score))
+    metrics[1].metric("Risk Level", assessment.risk_level.value if hasattr(assessment.risk_level, "value") else str(assessment.risk_level))
+    metrics[2].metric("Evidence Count", str(assessment.evidence_count))
+    metrics[3].metric("Typologies", str(len(assessment.typologies_detected)))
+    metrics[4].metric("Suspicious Tx", str(assessment.total_suspicious_transactions))
+    metrics[5].metric("Suspicious Amount", format_amount_compact(assessment.total_suspicious_amount))
 
     left, right = st.columns([1.25, 1])
 
@@ -98,12 +108,12 @@ def _render_report(report: InvestigationReport) -> None:
 
     with right:
         st.subheader("Score Breakdown")
-        st.dataframe(breakdown_rows(report.score_breakdown), use_container_width=True, hide_index=True)
+        st.dataframe(breakdown_rows(assessment.score_breakdown), use_container_width=True, hide_index=True)
         st.subheader("Timeline")
         st.dataframe(timeline_rows(report), use_container_width=True, hide_index=True)
 
     st.subheader("Evidence Summary")
-    evidence_frame = evidence_rows_from_report(report)
+    evidence_frame = evidence_rows_from_assessment(assessment)
     if evidence_frame.empty:
         st.info("No contributing evidence was available.")
     else:
@@ -114,8 +124,8 @@ def _render_report(report: InvestigationReport) -> None:
             st.json(report.metadata)
 
 
-def evidence_rows_from_report(report: InvestigationReport):
-    frame = evidence_rows(report)
+def evidence_rows_from_assessment(assessment: RiskAssessment):
+    frame = evidence_rows(assessment)
     if not frame.empty:
         frame["Amount"] = frame["Amount"].map(format_amount)
     return frame
