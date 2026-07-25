@@ -48,6 +48,15 @@ Evaluation-only labels and annotations:
 - `HI-Small_Patterns.txt` annotations are parsed only for post-detection evaluation
 - Labels and annotations are not used as engineered detector features, thresholds, planner inputs, or triggering evidence
 
+## Phase 6 Risk Assessment
+
+Phase 6 adds a deterministic evidence aggregation and risk-scoring layer:
+- `EvidenceAggregator` groups detector evidence by account and deduplicates overlapping transaction references where possible
+- `RiskScorer` converts aggregated evidence into a transparent 0-100 risk score and a `LOW` / `MEDIUM` / `HIGH` / `CRITICAL` level
+- score breakdowns and reasons are explicit, reproducible, and label-independent
+
+Risk scores represent suspicious-pattern evidence only. They are not proof of money laundering or criminal activity.
+
 ## Phase 3 Architecture
 
 ```mermaid
